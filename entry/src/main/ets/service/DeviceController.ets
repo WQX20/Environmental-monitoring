@@ -4,12 +4,33 @@
 import { AppState, Device, DeviceType, EnvironmentData } from '../model/DataModels'
 import { THRESHOLDS } from '../data/Constants'
 
+type StateChangeListener = () => void
+
+const stateChangeListeners: StateChangeListener[] = []
+
+export function subscribeStateChange(listener: StateChangeListener): () => void {
+  stateChangeListeners.push(listener)
+  return (): void => {
+    let index = stateChangeListeners.indexOf(listener)
+    if (index >= 0) {
+      stateChangeListeners.splice(index, 1)
+    }
+  }
+}
+
+function notifyStateChange(): void {
+  for (let listener of stateChangeListeners) {
+    listener()
+  }
+}
+
 function recordOperation(state: AppState, message: string): void {
   state.lastOperationMessage = message
   state.operationHistory.unshift(`${new Date().toLocaleTimeString()} ${message}`)
   if (state.operationHistory.length > 5) {
     state.operationHistory.pop()
   }
+  notifyStateChange()
 }
 
 export function publishOperation(state: AppState, message: string): void {

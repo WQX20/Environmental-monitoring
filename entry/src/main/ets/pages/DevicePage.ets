@@ -4,22 +4,38 @@
 import { AppState, Device, DeviceType } from '../model/DataModels'
 import { DeviceCard } from '../components/DeviceCard'
 import { LinkagePanel } from '../components/LinkagePanel'
-import { toggleDevice, updateDeviceTarget, executeAllOff, publishOperation, clearManualOverride, clearAllManualOverrides } from '../service/DeviceController'
+import { toggleDevice, updateDeviceTarget, executeAllOff, publishOperation, clearAllManualOverrides, clearManualOverride, subscribeStateChange } from '../service/DeviceController'
 import { sharedState } from '../data/AppStateManager'
 import { COLORS } from '../data/Constants'
 
 @Component
 export struct DevicePage {
+  @Prop uiRevision: number = 0
   @State appState: AppState = sharedState
   @State toastMessage: string = ''
   @State showToast: boolean = false
+  @State refreshToken: number = 0
+  private unsubscribeStateChange: (() => void) | undefined = undefined
+
+  aboutToAppear(): void {
+    this.unsubscribeStateChange = subscribeStateChange(() => {
+      this.refreshToken++
+    })
+  }
+
+  aboutToDisappear(): void {
+    if (this.unsubscribeStateChange) {
+      this.unsubscribeStateChange()
+      this.unsubscribeStateChange = undefined
+    }
+  }
 
   handleToggle(deviceId: string): void {
     let device = this.appState.devices.find(d => d.id === deviceId)
     if (device) {
       let msg = toggleDevice(device)
       if (device.isOn) {
-        this.appState.manualOverrideDeviceIds = this.appState.manualOverrideDeviceIds.filter(id => id !== device?.id)
+        clearManualOverride(this.appState, device.id)
       } else {
         if (!this.appState.manualOverrideDeviceIds.includes(device.id)) {
           this.appState.manualOverrideDeviceIds.push(device.id)
@@ -93,7 +109,7 @@ export struct DevicePage {
                 })
               }
               .margin({ bottom: 4 })
-            })
+            }, (device: Device) => `${device.id}_${this.refreshToken}`)
           }
           .width('90%')
           .padding({ bottom: 12 })
@@ -103,7 +119,8 @@ export struct DevicePage {
             currentScene: this.appState.currentScene,
             lastOperationMessage: this.appState.lastOperationMessage,
             operationHistory: this.appState.operationHistory,
-            onAllOff: (): void => { this.handleAllOff() }
+            onAllOff: (): void => { this.handleAllOff() },
+            refreshSeed: this.refreshToken
           })
           .margin({ bottom: 16 })
         }

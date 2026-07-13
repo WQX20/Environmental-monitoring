@@ -6,33 +6,49 @@ import { ScenePage } from './ScenePage'
 import { DevicePage } from './DevicePage'
 import { AiAdvicePage } from './AiAdvicePage'
 import { COLORS } from '../data/Constants'
+import { subscribeStateChange } from '../service/DeviceController'
 
 @Entry
 @Component
 struct Index {
   @State currentIndex: number = 0
+  @State uiRevision: number = 0
   private tabTitles: string[] = ['首页', '场景', '设备', 'AI建议']
   private tabIcons: string[] = ['🏠', '🎯', '🔌', '🤖']
+  private unsubscribeStateChange: (() => void) | undefined = undefined
+
+  aboutToAppear(): void {
+    this.unsubscribeStateChange = subscribeStateChange(() => {
+      this.uiRevision++
+    })
+  }
+
+  aboutToDisappear(): void {
+    if (this.unsubscribeStateChange) {
+      this.unsubscribeStateChange()
+      this.unsubscribeStateChange = undefined
+    }
+  }
 
   build() {
     Tabs({ index: $$this.currentIndex }) {
       TabContent() {
-        HomePage()
+        HomePage({ uiRevision: this.uiRevision })
       }
       .tabBar(this.buildTabBar(0))
 
       TabContent() {
-        ScenePage()
+        ScenePage({ uiRevision: this.uiRevision })
       }
       .tabBar(this.buildTabBar(1))
 
       TabContent() {
-        DevicePage()
+        DevicePage({ uiRevision: this.uiRevision })
       }
       .tabBar(this.buildTabBar(2))
 
       TabContent() {
-        AiAdvicePage()
+        AiAdvicePage({ uiRevision: this.uiRevision })
       }
       .tabBar(this.buildTabBar(3))
     }

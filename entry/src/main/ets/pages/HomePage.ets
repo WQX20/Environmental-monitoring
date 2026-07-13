@@ -13,6 +13,7 @@ import { COLORS, THRESHOLDS } from '../data/Constants'
 
 @Component
 export struct HomePage {
+  @Prop uiRevision: number = 0
   @State appState: AppState = sharedState
   @State envScore: EnvironmentScore = calculateEnvironmentScore(this.appState.currentEnv)
   @State linkageActions: string[] = []

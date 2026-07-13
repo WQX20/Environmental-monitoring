@@ -12,6 +12,7 @@ import { sharedState } from '../data/AppStateManager'
 
 @Component
 export struct ScenePage {
+  @Prop uiRevision: number = 0
   @State appState: AppState = sharedState
   @State recommendations: SceneRecommendation[] = []
   @State sceneResultText: string = ''
