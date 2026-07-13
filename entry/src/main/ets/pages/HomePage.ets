@@ -4,6 +4,7 @@
 import { AppState, EnvironmentData, EnvironmentScore, SceneMode } from '../model/DataModels'
 import { EnvironmentCard } from '../components/EnvironmentCard'
 import { MetricRow } from '../components/MetricRow'
+import { LinkagePanel } from '../components/LinkagePanel'
 import { calculateEnvironmentScore } from '../service/EnvironmentScore'
 import { executeAutoOptimize, getLinkageSuggestions } from '../service/DeviceController'
 import { generateMockData } from '../data/MockData'
@@ -144,26 +145,22 @@ export struct HomePage {
         .width('100%')
         .padding({ left: 20, top: 12, bottom: 4 })
 
-        // 一键优化按钮
-        Button('⚡ 一键优化环境')
-          .fontSize(16)
-          .fontWeight(FontWeight.Medium)
-          .width('90%')
-          .height(48)
-          .backgroundColor(COLORS.primary)
-          .fontColor(COLORS.white)
-          .borderRadius(24)
-          .margin({ top: 8, bottom: 8 })
-          .onClick(() => {
+        LinkagePanel({
+          panelTitle: '联动面板',
+          currentScene: this.appState.currentScene,
+          lastOperationMessage: this.appState.lastOperationMessage,
+          operationHistory: this.appState.operationHistory,
+          onAutoOptimize: (): void => {
             let results = executeAutoOptimize(this.appState)
             this.optimizeResultText = results.join('\n')
             this.showOptimizeResult = true
             setTimeout(() => {
               this.showOptimizeResult = false
             }, 3000)
-          })
+          }
+        })
+        .margin({ top: 8, bottom: 12 })
 
-        // 优化结果提示
         if (this.showOptimizeResult) {
           Text(this.optimizeResultText)
             .fontSize(13)
@@ -173,6 +170,7 @@ export struct HomePage {
             .borderRadius(12)
             .width('90%')
             .textAlign(TextAlign.Center)
+            .margin({ bottom: 8 })
         }
 
         // 联动建议

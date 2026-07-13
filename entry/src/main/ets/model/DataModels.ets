@@ -108,6 +108,9 @@ export class AppState {
   trendHistory: TrendPoint[]
   healthReminders: HealthReminder[]
   sessionStartTime: number
+  lastOperationMessage: string
+  operationHistory: string[]
+  manualOverrideDeviceIds: string[]
 
   constructor() {
     this.currentEnv = {
@@ -138,5 +141,8 @@ export class AppState {
       { type: 'sleep', message: '已过23:00，建议准备入睡', interval: 0, lastTriggered: Date.now() }
     ]
     this.sessionStartTime = Date.now()
+    this.lastOperationMessage = ''
+    this.operationHistory = []
+    this.manualOverrideDeviceIds = []
   }
 }
