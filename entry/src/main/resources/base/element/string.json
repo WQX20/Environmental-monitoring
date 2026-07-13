@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "智慧环境生活管家 - 环境驱动的智能生活决策系统"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "智慧环境生活管家"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "环境管家"
+    }
+  ]
+}

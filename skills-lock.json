@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "arkts-syntax-assistant": {
+      "source": "SummerKaze/skill-arkts-syntax-assistant",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "48df47a41dc177d0067b809e3c53d28d44c020392047e37c81d6261cc5f4d9b6"
+    }
+  }
+}
