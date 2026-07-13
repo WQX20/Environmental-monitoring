@@ -12,6 +12,7 @@ import { publishOperation } from '../service/DeviceController'
 
 @Component
 export struct AiAdvicePage {
+  @Prop uiRevision: number = 0
   @State appState: AppState = sharedState
   private timerId: number = -1
   private trendTimerId: number = -1

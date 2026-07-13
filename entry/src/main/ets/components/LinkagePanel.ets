@@ -9,6 +9,7 @@ export struct LinkagePanel {
   @Prop currentScene: string = ''
   @Prop lastOperationMessage: string = ''
   @Prop operationHistory: string[] = []
+  @Prop refreshSeed: number = 0
   onAutoOptimize?: () => void
   onAllOff?: () => void
 
