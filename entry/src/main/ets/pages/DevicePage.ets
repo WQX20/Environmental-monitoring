@@ -3,7 +3,8 @@
 // ============================================================
 import { AppState, Device, DeviceType } from '../model/DataModels'
 import { DeviceCard } from '../components/DeviceCard'
-import { toggleDevice, updateDeviceTarget, executeAllOff } from '../service/DeviceController'
+import { LinkagePanel } from '../components/LinkagePanel'
+import { toggleDevice, updateDeviceTarget, executeAllOff, publishOperation, clearManualOverride, clearAllManualOverrides } from '../service/DeviceController'
 import { sharedState } from '../data/AppStateManager'
 import { COLORS } from '../data/Constants'
 
@@ -17,6 +18,14 @@ export struct DevicePage {
     let device = this.appState.devices.find(d => d.id === deviceId)
     if (device) {
       let msg = toggleDevice(device)
+      if (device.isOn) {
+        this.appState.manualOverrideDeviceIds = this.appState.manualOverrideDeviceIds.filter(id => id !== device?.id)
+      } else {
+        if (!this.appState.manualOverrideDeviceIds.includes(device.id)) {
+          this.appState.manualOverrideDeviceIds.push(device.id)
+        }
+      }
+      publishOperation(this.appState, msg)
       this.showToastMessage(msg)
     }
   }
@@ -25,12 +34,19 @@ export struct DevicePage {
     let device = this.appState.devices.find(d => d.id === deviceId)
     if (device) {
       updateDeviceTarget(device, value)
+      let msg = `已将${device.name}目标值调整为${value}${device.unit}`
+      if (!this.appState.manualOverrideDeviceIds.includes(device.id)) {
+        this.appState.manualOverrideDeviceIds.push(device.id)
+      }
+      publishOperation(this.appState, msg)
+      this.showToastMessage(msg)
     }
   }
 
   handleAllOff(): void {
     let results = executeAllOff(this.appState)
-    this.showToastMessage(results[0])
+    clearAllManualOverrides(this.appState)
+    this.showToastMessage(results.join('\n'))
   }
 
   showToastMessage(msg: string): void {
@@ -82,16 +98,14 @@ export struct DevicePage {
           .width('90%')
           .padding({ bottom: 12 })
 
-          // 一键全关
-          Button('🔒 一键全关')
-            .fontSize(16)
-            .width('90%')
-            .height(48)
-            .backgroundColor(COLORS.danger)
-            .fontColor(COLORS.white)
-            .borderRadius(24)
-            .margin({ top: 4, bottom: 24 })
-            .onClick(() => { this.handleAllOff() })
+          LinkagePanel({
+            panelTitle: '联动面板',
+            currentScene: this.appState.currentScene,
+            lastOperationMessage: this.appState.lastOperationMessage,
+            operationHistory: this.appState.operationHistory,
+            onAllOff: (): void => { this.handleAllOff() }
+          })
+          .margin({ bottom: 16 })
         }
         .width('100%')
       }

@@ -8,6 +8,7 @@ import { calculateEnvironmentScore } from '../service/EnvironmentScore'
 import { generateMockData } from '../data/MockData'
 import { sharedState } from '../data/AppStateManager'
 import { COLORS } from '../data/Constants'
+import { publishOperation } from '../service/DeviceController'
 
 @Component
 export struct AiAdvicePage {
@@ -68,6 +69,8 @@ export struct AiAdvicePage {
       if (this.appState.currentEnv.co2 < 400) {
         this.appState.currentEnv.co2 = 400
       }
+      let message = `AI建议：已执行${suggestion.title}`
+      publishOperation(this.appState, message)
     }
   }
 
@@ -193,6 +196,30 @@ export struct AiAdvicePage {
           .backgroundColor(COLORS.white)
           .borderRadius(12)
           .padding(12)
+          .margin({ bottom: 8 })
+        }
+
+        if (this.appState.operationHistory.length > 0) {
+          Column() {
+            Text('🕒 最近操作')
+              .fontSize(16)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(COLORS.text)
+              .width('100%')
+              .padding({ bottom: 8 })
+
+            ForEach(this.appState.operationHistory, (item: string) => {
+              Text(item)
+                .fontSize(12)
+                .fontColor(COLORS.textSecondary)
+                .width('100%')
+                .padding({ top: 4, bottom: 4 })
+            })
+          }
+          .width('90%')
+          .padding(14)
+          .backgroundColor(COLORS.white)
+          .borderRadius(12)
           .margin({ bottom: 8 })
         }
 

@@ -3,7 +3,9 @@
 // ============================================================
 import { AppState, SceneMode } from '../model/DataModels'
 import { SceneCard } from '../components/SceneCard'
+import { LinkagePanel } from '../components/LinkagePanel'
 import { getSceneRecommendations, SceneRecommendation } from '../service/SceneAdvisor'
+import { applySceneAutomation, executeAutoOptimize } from '../service/DeviceController'
 import { COLORS, SCENE_DESCRIPTIONS, SCENE_ICONS } from '../data/Constants'
 import { generateMockData } from '../data/MockData'
 import { sharedState } from '../data/AppStateManager'
@@ -12,6 +14,8 @@ import { sharedState } from '../data/AppStateManager'
 export struct ScenePage {
   @State appState: AppState = sharedState
   @State recommendations: SceneRecommendation[] = []
+  @State sceneResultText: string = ''
+  @State showSceneResult: boolean = false
   private timerId: number = -1
 
   aboutToAppear(): void {
@@ -35,6 +39,12 @@ export struct ScenePage {
   activateScene(scene: SceneMode): void {
     this.appState.currentScene = scene
     this.updateRecommendations()
+    let results = applySceneAutomation(this.appState)
+    this.sceneResultText = results.join('\n')
+    this.showSceneResult = true
+    setTimeout(() => {
+      this.showSceneResult = false
+    }, 2500)
   }
 
   build() {
@@ -137,6 +147,28 @@ export struct ScenePage {
         .rowsGap(10)
         .padding({ left: 16, right: 16 })
         .margin({ bottom: 16 })
+
+        if (this.showSceneResult) {
+          Text(this.sceneResultText)
+            .fontSize(13)
+            .fontColor(COLORS.white)
+            .padding(14)
+            .backgroundColor(COLORS.primary)
+            .borderRadius(12)
+            .width('90%')
+            .margin({ bottom: 12 })
+        }
+
+        LinkagePanel({
+          panelTitle: '联动面板',
+          currentScene: this.appState.currentScene,
+          lastOperationMessage: this.appState.lastOperationMessage,
+          operationHistory: this.appState.operationHistory,
+          onAutoOptimize: (): void => {
+            executeAutoOptimize(this.appState)
+          }
+        })
+        .margin({ bottom: 12 })
 
         // 当前场景建议
         Text('📋 当前场景建议')
