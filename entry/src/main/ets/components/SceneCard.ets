@@ -1,7 +1,7 @@
 // ============================================================
-// 场景模式卡片
+// 场景卡片 — 场景专属色 + 激活态光效
 // ============================================================
-import { COLORS, SCENE_DESCRIPTIONS } from '../data/Constants'
+import { COLORS, RADIUS, FONTS, SCENE_COLORS, DURATION } from '../data/Constants'
 
 @Component
 export struct SceneCard {
@@ -13,58 +13,74 @@ export struct SceneCard {
   onToggle?: () => void
 
   build() {
-    Column() {
-      Row() {
-        Text(this.icon)
-          .fontSize(32)
-        Column() {
+    Column({ space: 0 }) {
+      // ── 主内容区 ──
+      Row({ space: 12 }) {
+        // 图标圆
+        Stack({ alignContent: Alignment.Center }) {
+          Circle()
+            .width(48).height(48)
+            .fill(this.isActive ? 'rgba(255,255,255,0.25)' : COLORS.bgPrimary)
+          Text(this.icon).fontSize(26)
+        }
+        .width(48).height(48)
+
+        // 标题 + 描述
+        Column({ space: 4 }) {
           Text(this.title)
-            .fontSize(16)
+            .fontSize(FONTS.body)
             .fontWeight(FontWeight.Bold)
-            .fontColor(COLORS.text)
+            .fontColor(this.isActive ? COLORS.textInverse : COLORS.textPrimary)
           Text(this.description)
-            .fontSize(11)
-            .fontColor(COLORS.textSecondary)
+            .fontSize(FONTS.caption)
+            .fontColor(this.isActive ? 'rgba(255,255,255,0.80)' : COLORS.textTertiary)
             .maxLines(2)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .lineHeight(15)
         }
         .alignItems(HorizontalAlign.Start)
         .layoutWeight(1)
-        .margin({ left: 10 })
       }
       .width('100%')
 
+      // ── 状态标签行 ──
       Row() {
-        Text(this.isActive ? '已激活' : '点击激活')
-          .fontSize(12)
-          .fontColor(this.isActive ? COLORS.white : COLORS.primary)
-          .padding({ top: 4, bottom: 4, left: 12, right: 12 })
-          .backgroundColor(this.isActive ? COLORS.primary : COLORS.primaryLight + '30')
-          .borderRadius(12)
+        if (this.isActive) {
+          Row({ space: 6 }) {
+            Circle().width(6).height(6).fill('#FFFFFF')
+            Text('运行中')
+              .fontSize(FONTS.caption)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(COLORS.textInverse)
+          }
+          .padding({ top: 5, bottom: 5, left: 12, right: 12 })
+          .backgroundColor('rgba(255,255,255,0.20)')
+          .borderRadius(RADIUS.full)
+        } else {
+          Text('点击激活')
+            .fontSize(FONTS.caption)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(COLORS.primary)
+            .padding({ top: 5, bottom: 5, left: 12, right: 12 })
+            .backgroundColor(COLORS.primarySoft)
+            .borderRadius(RADIUS.full)
+        }
       }
       .width('100%')
       .justifyContent(FlexAlign.End)
-      .margin({ top: 8 })
-
-      if (this.isActive) {
-        Text('✓ 设备已按场景预设调整')
-          .fontSize(11)
-          .fontColor(COLORS.success)
-          .margin({ top: 6 })
-      }
+      .margin({ top: 14 })
     }
     .width('100%')
     .padding(16)
-    .backgroundColor(this.isActive ? COLORS.primaryLight + '20' : COLORS.white)
-    .borderRadius(14)
-    .border({
-      width: this.isActive ? 2 : 1,
-      color: this.isActive ? COLORS.primary : COLORS.divider
-    })
-    .onClick(() => {
-      if (this.onToggle) {
-        this.onToggle()
-      }
-    })
+    .constraintSize({ minHeight: 140 })
+    .backgroundColor(this.isActive ? (SCENE_COLORS[this.title] || COLORS.primary) : COLORS.surface)
+    .borderRadius(RADIUS.xl)
+    .border({ width: this.isActive ? 0 : 1, color: COLORS.borderLight })
+    .shadow(this.isActive ?
+      { radius: 20, color: 'rgba(13,148,136,0.25)', offsetY: 0 } :
+      { radius: 4, color: 'rgba(15,23,42,0.06)', offsetY: 1 })
+    .scale(this.isActive ? { x: 1.03, y: 1.03 } : { x: 1.0, y: 1.0 })
+    .animation({ duration: DURATION.normal, curve: Curve.EaseOut })
+    .onClick(() => { if (this.onToggle) this.onToggle() })
   }
 }

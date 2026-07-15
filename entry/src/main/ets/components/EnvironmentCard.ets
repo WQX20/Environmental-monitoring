@@ -1,8 +1,8 @@
 // ============================================================
-// 环境状态分数卡片
+// 环境评分卡片 — 双环进度 + 等级表情 + 异常标签列表
 // ============================================================
-import { EnvironmentScore, EnvironmentLevel } from '../model/DataModels'
-import { COLORS } from '../data/Constants'
+import { EnvironmentScore } from '../model/DataModels'
+import { COLORS, RADIUS, FONTS, ICONS } from '../data/Constants'
 
 @Component
 export struct EnvironmentCard {
@@ -12,81 +12,114 @@ export struct EnvironmentCard {
   @Prop anomalies: string[] = []
 
   build() {
-    Column() {
-      // 分数环形区域
-      Stack() {
-        // 背景圆环
+    Column({ space: 0 }) {
+      // ═══ 评分环区 ═══
+      Stack({ alignContent: Alignment.Center }) {
+        // 光晕底
         Circle()
-          .width(140)
-          .height(140)
-          .fill(COLORS.darkOverlay)
-          .stroke(COLORS.primaryLight)
-          .strokeWidth(10)
+          .width(168)
+          .height(168)
+          .fill('rgba(94,234,212,0.10)')
 
-        // 前景进度弧（用 Progress 模拟）
-        Progress({
-          value: this.score,
-          total: 100,
-          type: ProgressType.Ring
-        })
-          .width(140)
-          .height(140)
+        // 底环
+        Circle()
+          .width(152)
+          .height(152)
+          .fill(COLORS.surface)
+          .stroke('#E2E8F0')
+          .strokeWidth(12)
+
+        // 进度环
+        Progress({ value: this.score, total: 100, type: ProgressType.Ring })
+          .width(152)
+          .height(152)
           .color(this.getScoreColor())
-          .style({ strokeWidth: 10 })
+          .style({ strokeWidth: 12 })
 
-        Column() {
+        // 中心数值组
+        Column({ space: 0 }) {
           Text(`${this.score}`)
-            .fontSize(36)
+            .fontSize(FONTS.displayLg)
             .fontWeight(FontWeight.Bold)
             .fontColor(this.getScoreColor())
+          Text(this.getLevelEmoji())
+            .fontSize(18)
+            .margin({ top: 2 })
           Text(this.level)
-            .fontSize(14)
-            .fontColor(COLORS.textSecondary)
+            .fontSize(FONTS.bodySm)
+            .fontColor(COLORS.textTertiary)
+            .margin({ top: 1 })
         }
+        .alignItems(HorizontalAlign.Center)
       }
-      .padding({ bottom: 12 })
+      .margin({ top: 4, bottom: 20 })
 
-      // 一句话建议
-      Text(this.suggestion)
-        .fontSize(14)
-        .fontColor(COLORS.text)
-        .textAlign(TextAlign.Center)
-        .maxLines(2)
-        .width('90%')
+      // ═══ 分割线 ═══
+      Divider()
+        .width('75%')
+        .color(COLORS.borderLight)
+        .strokeWidth(0.5)
+        .margin({ bottom: 16 })
 
-      // 异常项列表
+      // ═══ 建议文案 ═══
+      Row({ space: 8 }) {
+        Text(ICONS.secSuggestion).fontSize(15)
+        Text(this.suggestion)
+          .fontSize(FONTS.bodySm)
+          .fontColor(COLORS.textPrimary)
+          .maxLines(2)
+          .textAlign(TextAlign.Start)
+          .layoutWeight(1)
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.Start)
+      .margin({ bottom: this.anomalies.length > 0 ? 14 : 0 })
+
+      // ═══ 异常标签 (纵向排列，自然换行) ═══
       if (this.anomalies.length > 0) {
-        Column() {
+        Column({ space: 8 }) {
           ForEach(this.anomalies, (item: string) => {
-            Row() {
-              Text('⚠️')
-                .fontSize(12)
+            Row({ space: 6 }) {
+              Text('!')
+                .fontSize(10)
+                .fontWeight(FontWeight.Bold)
+                .fontColor('#EF4444')
+                .width(18)
+                .height(18)
+                .backgroundColor('#FEE2E2')
+                .borderRadius(9)
+                .textAlign(TextAlign.Center)
               Text(item)
-                .fontSize(12)
-                .fontColor(COLORS.danger)
-                .margin({ left: 4 })
+                .fontSize(FONTS.caption)
+                .fontColor('#DC2626')
             }
-            .padding({ top: 4, bottom: 4, left: 12, right: 12 })
-            .backgroundColor('#FFEBEE')
-            .borderRadius(16)
-            .margin({ top: 4 })
+            .padding({ top: 6, bottom: 6, left: 12, right: 14 })
+            .backgroundColor('#FEF2F2')
+            .borderRadius(RADIUS.full)
+            .border({ width: 1, color: '#FECACA' })
           })
         }
-        .margin({ top: 8 })
         .width('100%')
         .alignItems(HorizontalAlign.Center)
       }
     }
     .width('100%')
-    .padding(20)
-    .backgroundColor(COLORS.white)
-    .borderRadius(16)
-    .shadow({ radius: 8, color: COLORS.darkOverlay, offsetY: 2 })
+    .padding({ top: 24, bottom: 22, left: 20, right: 20 })
+    .backgroundColor(COLORS.surface)
+    .borderRadius(RADIUS.xl)
+    .shadow({ radius: 16, color: 'rgba(15,23,42,0.10)', offsetY: 4 })
   }
 
   getScoreColor(): string {
     if (this.score >= 85) return COLORS.success
     if (this.score >= 70) return COLORS.warning
     return COLORS.danger
+  }
+
+  getLevelEmoji(): string {
+    if (this.score >= 85) return ICONS.levelGreat
+    if (this.score >= 70) return ICONS.levelGood
+    if (this.score >= 55) return ICONS.levelOkay
+    return ICONS.levelBad
   }
 }

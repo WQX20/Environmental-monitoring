@@ -1,8 +1,8 @@
 // ============================================================
-// AI 建议气泡
+// AI 建议气泡 — 左色条 + 分类图标 + 时间/操作区
 // ============================================================
-import { Suggestion, SuggestionCategory } from '../model/DataModels'
-import { COLORS } from '../data/Constants'
+import { SuggestionCategory } from '../model/DataModels'
+import { COLORS, RADIUS, FONTS } from '../data/Constants'
 
 @Component
 export struct SuggestionBubble {
@@ -17,74 +17,105 @@ export struct SuggestionBubble {
   onSuggestionAction?: () => void
 
   build() {
-    Row() {
-      // 左侧图标
-      Column() {
-        Text(this.sugIcon)
-          .fontSize(24)
+    Row({ space: 12 }) {
+      // 图标圆
+      Stack({ alignContent: Alignment.Center }) {
+        Circle().width(40).height(40).fill(this.getCategoryBg())
+        Text(this.sugIcon).fontSize(18)
       }
-      .width(44)
-      .height(44)
-      .borderRadius(22)
-      .backgroundColor(this.getCategoryBg())
-      .justifyContent(FlexAlign.Center)
-      .alignItems(HorizontalAlign.Center)
+      .width(40).height(40)
 
-      // 中间内容
-      Column() {
-        Row() {
+      // 内容
+      Column({ space: 0 }) {
+        // 标题 + 分类标签
+        Row({ space: 8 }) {
           Text(this.sugTitle)
-            .fontSize(15)
-            .fontWeight(FontWeight.Medium)
-            .fontColor(COLORS.text)
+            .fontSize(FONTS.bodySm)
+            .fontWeight(FontWeight.Bold)
+            .fontColor(COLORS.textPrimary)
             .layoutWeight(1)
-          Text(this.getTimeAgo())
-            .fontSize(11)
-            .fontColor(COLORS.textHint)
+            .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+
+          Text(this.getCategoryLabel())
+            .fontSize(9)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(this.getCategoryAccent())
+            .padding({ top: 2, bottom: 2, left: 6, right: 6 })
+            .backgroundColor(this.getCategoryBg())
+            .borderRadius(RADIUS.full)
         }
         .width('100%')
+        .margin({ bottom: 6 })
 
+        // 详情
         Text(this.sugDetail)
-          .fontSize(13)
+          .fontSize(FONTS.caption)
           .fontColor(COLORS.textSecondary)
           .maxLines(3)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .margin({ top: 4 })
+          .lineHeight(17)
+          .margin({ bottom: 8 })
+
+        // 底部：时间 + 操作按钮
+        Row({ space: 8 }) {
+          Text(this.getTimeAgo())
+            .fontSize(10)
+            .fontColor(COLORS.textTertiary)
+
+          Blank()
+
+          if (this.sugActionType !== 'none') {
+            Button() {
+              Row({ space: 3 }) {
+                Text(this.sugActionLabel).fontSize(11).fontWeight(FontWeight.Medium)
+                Text('→').fontSize(11)
+              }
+            }
+            .height(28)
+            .fontSize(11)
+            .backgroundColor(this.getCategoryAccent())
+            .fontColor(COLORS.textInverse)
+            .borderRadius(RADIUS.full)
+            .padding({ left: 12, right: 10 })
+            .onClick(() => { if (this.onSuggestionAction) this.onSuggestionAction() })
+          }
+        }
+        .width('100%')
       }
       .layoutWeight(1)
-      .margin({ left: 10 })
-
-      // 右侧操作按钮
-      if (this.sugActionType !== 'none') {
-        Button(this.sugActionLabel)
-          .fontSize(11)
-          .height(28)
-          .backgroundColor(COLORS.primary)
-          .fontColor(COLORS.white)
-          .borderRadius(14)
-          .padding({ left: 10, right: 10 })
-          .onClick(() => {
-            if (this.onSuggestionAction) {
-              this.onSuggestionAction()
-            }
-          })
-          .margin({ left: 6 })
-      }
     }
     .width('100%')
-    .padding(14)
-    .backgroundColor(COLORS.white)
-    .borderRadius(14)
-    .border({ width: 1, color: COLORS.divider })
+    .padding({ top: 14, bottom: 14, left: 16, right: 16 })
+    .backgroundColor(COLORS.surface)
+    .borderRadius(RADIUS.lg)
+    .border({ width: { left: 3 }, color: this.getCategoryAccent() })
+    .shadow({ radius: 4, color: 'rgba(15,23,42,0.06)', offsetY: 1 })
     .margin({ bottom: 8 })
   }
 
+  getCategoryAccent(): string {
+    if (this.sugCategory === SuggestionCategory.ENV) return COLORS.info
+    if (this.sugCategory === SuggestionCategory.HEALTH) return COLORS.danger
+    if (this.sugCategory === SuggestionCategory.STUDY) return '#8B5CF6'
+    if (this.sugCategory === SuggestionCategory.ENERGY) return COLORS.warning
+    return COLORS.primary
+  }
+
   getCategoryBg(): string {
-    if (this.sugCategory === SuggestionCategory.ENV) return COLORS.info + '20'
-    if (this.sugCategory === SuggestionCategory.HEALTH) return COLORS.danger + '20'
-    if (this.sugCategory === SuggestionCategory.STUDY) return COLORS.accent + '20'
-    if (this.sugCategory === SuggestionCategory.ENERGY) return COLORS.warning + '20'
-    return COLORS.darkOverlay
+    if (this.sugCategory === SuggestionCategory.ENV) return '#EFF6FF'
+    if (this.sugCategory === SuggestionCategory.HEALTH) return '#FEF2F2'
+    if (this.sugCategory === SuggestionCategory.STUDY) return '#F5F3FF'
+    if (this.sugCategory === SuggestionCategory.ENERGY) return '#FFFBEB'
+    return COLORS.primarySoft
+  }
+
+  getCategoryLabel(): string {
+    if (this.sugCategory === SuggestionCategory.ENV) return '环境'
+    if (this.sugCategory === SuggestionCategory.HEALTH) return '健康'
+    if (this.sugCategory === SuggestionCategory.STUDY) return '学习'
+    if (this.sugCategory === SuggestionCategory.ENERGY) return '节能'
+    return '建议'
   }
 
   getTimeAgo(): string {
@@ -92,7 +123,6 @@ export struct SuggestionBubble {
     let minutes = Math.floor(diff / 60000)
     if (minutes < 1) return '刚刚'
     if (minutes < 60) return `${minutes}分钟前`
-    let hours = Math.floor(minutes / 60)
-    return `${hours}小时前`
+    return `${Math.floor(minutes / 60)}小时前`
   }
 }

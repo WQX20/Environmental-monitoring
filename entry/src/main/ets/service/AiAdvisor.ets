@@ -2,7 +2,7 @@
 // 智慧环境生活管家 — AI 建议生成引擎
 // ============================================================
 import { AppState, Suggestion, SuggestionCategory, DeviceType } from '../model/DataModels'
-import { THRESHOLDS } from '../data/Constants'
+import { THRESHOLDS, ICONS } from '../data/Constants'
 
 export function generateSuggestions(state: AppState): Suggestion[] {
   let newSuggestions: Suggestion[] = []
@@ -23,7 +23,7 @@ export function generateSuggestions(state: AppState): Suggestion[] {
         detail: `当前室内CO2浓度${env.co2}ppm，室外空气更好（PM2.5:${env.outdoorPm25}），适合开窗通风10分钟`,
         actionLabel: '记录已开窗',
         actionType: 'openWindow',
-        icon: '🪟'
+        icon: ICONS.curtain
       })
     } else {
       newSuggestions.push({
@@ -34,7 +34,7 @@ export function generateSuggestions(state: AppState): Suggestion[] {
         detail: `室内CO2达${env.co2}ppm，建议短暂开窗或开启新风系统`,
         actionLabel: '开启净化器',
         actionType: 'startDevice',
-        icon: '🌬️'
+        icon: ICONS.purifier
       })
     }
   }
@@ -49,7 +49,7 @@ export function generateSuggestions(state: AppState): Suggestion[] {
       detail: `当前湿度${env.humidity}%，干燥环境不适合长时间学习与工作，建议开启加湿器`,
       actionLabel: '开启加湿器',
       actionType: 'startDevice',
-      icon: '💧'
+      icon: ICONS.humidity
     })
   }
 
@@ -63,7 +63,7 @@ export function generateSuggestions(state: AppState): Suggestion[] {
       detail: `室外PM2.5仅${env.outdoorPm25}μg/m³（${env.outdoorQuality}），适合开窗通风`,
       actionLabel: '知道了',
       actionType: 'none',
-      icon: '☀️'
+      icon: ICONS.light
     })
   }
 
@@ -77,7 +77,7 @@ export function generateSuggestions(state: AppState): Suggestion[] {
       detail: `PM2.5高达${env.pm25}μg/m³，已自动开启空气净化器，建议减少开窗`,
       actionLabel: '查看设备状态',
       actionType: 'startDevice',
-      icon: '⚠️'
+      icon: ICONS.warn
     })
   }
 
@@ -93,7 +93,7 @@ export function generateSuggestions(state: AppState): Suggestion[] {
       detail: `你已经连续使用${sessionDuration}分钟，建议休息5分钟，站起来走动并补水`,
       actionLabel: '开始休息',
       actionType: 'rest',
-      icon: '☕'
+      icon: ICONS.remRest
     })
   }
 
@@ -107,7 +107,7 @@ export function generateSuggestions(state: AppState): Suggestion[] {
       detail: `当前噪声${env.noise}dB，长时间处于此环境可能影响听力和专注力`,
       actionLabel: '查看降噪建议',
       actionType: 'none',
-      icon: '🔇'
+      icon: ICONS.noise
     })
   }
 
@@ -123,7 +123,7 @@ export function generateSuggestions(state: AppState): Suggestion[] {
         detail: '干燥环境容易导致疲劳和注意力下降，建议将湿度保持在45%以上',
         actionLabel: '开启加湿器',
         actionType: 'startDevice',
-        icon: '📚'
+        icon: ICONS.catStudy
       })
     }
   }
@@ -142,7 +142,7 @@ export function generateSuggestions(state: AppState): Suggestion[] {
         detail: `室外${env.outdoorTemp}°C舒适宜人，建议关空调开窗，既省电又通风`,
         actionLabel: '关闭空调',
         actionType: 'startDevice',
-        icon: '⚡'
+        icon: ICONS.catEnergy
       })
     }
   }

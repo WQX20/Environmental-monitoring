@@ -1,6 +1,7 @@
 // ============================================================
 // 智慧环境生活管家 — 数据模型定义
 // ============================================================
+import { DEVICE_ICONS } from '../data/Constants'
 
 // ---------- 环境指标 ----------
 export interface EnvironmentData {
@@ -127,11 +128,11 @@ export class AppState {
     }
     this.currentScene = SceneMode.NORMAL
     this.devices = [
-      { id: 'ac', name: '客厅空调', icon: '❄️', isOn: false, targetValue: 26, currentValue: 25, unit: '°C', type: DeviceType.AC },
-      { id: 'purifier', name: '空气净化器', icon: '🌬️', isOn: false, targetValue: 0, currentValue: 30, unit: 'μg/m³', type: DeviceType.PURIFIER },
-      { id: 'humidifier', name: '加湿器', icon: '💧', isOn: false, targetValue: 50, currentValue: 50, unit: '%', type: DeviceType.HUMIDIFIER },
-      { id: 'light', name: '书桌台灯', icon: '💡', isOn: false, targetValue: 100, currentValue: 0, unit: '%', type: DeviceType.LIGHT },
-      { id: 'curtain', name: '客厅窗帘', icon: '🪟', isOn: true, targetValue: 100, currentValue: 100, unit: '%', type: DeviceType.CURTAIN }
+      { id: 'ac', name: '客厅空调', icon: DEVICE_ICONS.ac, isOn: false, targetValue: 26, currentValue: 25, unit: '°C', type: DeviceType.AC },
+      { id: 'purifier', name: '空气净化器', icon: DEVICE_ICONS.purifier, isOn: false, targetValue: 0, currentValue: 30, unit: 'μg/m³', type: DeviceType.PURIFIER },
+      { id: 'humidifier', name: '加湿器', icon: DEVICE_ICONS.humidifier, isOn: false, targetValue: 50, currentValue: 50, unit: '%', type: DeviceType.HUMIDIFIER },
+      { id: 'light', name: '书桌台灯', icon: DEVICE_ICONS.light, isOn: false, targetValue: 100, currentValue: 0, unit: '%', type: DeviceType.LIGHT },
+      { id: 'curtain', name: '客厅窗帘', icon: DEVICE_ICONS.curtain, isOn: true, targetValue: 100, currentValue: 100, unit: '%', type: DeviceType.CURTAIN }
     ]
     this.suggestions = []
     this.trendHistory = []
