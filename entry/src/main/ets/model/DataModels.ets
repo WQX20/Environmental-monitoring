@@ -61,6 +61,14 @@ export interface Device {
   currentValue: number
   unit: string
   type: DeviceType
+  roomId: string
+}
+
+// ---------- 房间 ----------
+export interface Room {
+  id: string
+  name: string
+  icon: string
 }
 
 // ---------- AI 建议 ----------
@@ -112,27 +120,28 @@ export class AppState {
   lastOperationMessage: string
   operationHistory: string[]
   manualOverrideDeviceIds: string[]
+  // 用户 & 房间
+  familyName: string
+  memberCount: number
+  rooms: Room[]
+  currentRoomId: string
+  // 主题
+  currentThemeKey: string
 
   constructor() {
     this.currentEnv = {
-      temperature: 25,
-      humidity: 50,
-      pm25: 30,
-      co2: 600,
-      noise: 40,
-      light: 300,
-      outdoorTemp: 28,
-      outdoorHumidity: 55,
-      outdoorPm25: 25,
-      outdoorQuality: '良'
+      temperature: 25, humidity: 50, pm25: 30, co2: 600, noise: 40, light: 300,
+      outdoorTemp: 28, outdoorHumidity: 55, outdoorPm25: 25, outdoorQuality: '良'
     }
     this.currentScene = SceneMode.NORMAL
     this.devices = [
-      { id: 'ac', name: '客厅空调', icon: DEVICE_ICONS.ac, isOn: false, targetValue: 26, currentValue: 25, unit: '°C', type: DeviceType.AC },
-      { id: 'purifier', name: '空气净化器', icon: DEVICE_ICONS.purifier, isOn: false, targetValue: 0, currentValue: 30, unit: 'μg/m³', type: DeviceType.PURIFIER },
-      { id: 'humidifier', name: '加湿器', icon: DEVICE_ICONS.humidifier, isOn: false, targetValue: 50, currentValue: 50, unit: '%', type: DeviceType.HUMIDIFIER },
-      { id: 'light', name: '书桌台灯', icon: DEVICE_ICONS.light, isOn: false, targetValue: 100, currentValue: 0, unit: '%', type: DeviceType.LIGHT },
-      { id: 'curtain', name: '客厅窗帘', icon: DEVICE_ICONS.curtain, isOn: true, targetValue: 100, currentValue: 100, unit: '%', type: DeviceType.CURTAIN }
+      { id: 'ac_living', name: '客厅空调', icon: DEVICE_ICONS.ac, isOn: false, targetValue: 26, currentValue: 25, unit: '°C', type: DeviceType.AC, roomId: 'living' },
+      { id: 'purifier_living', name: '空气净化器', icon: DEVICE_ICONS.purifier, isOn: false, targetValue: 0, currentValue: 30, unit: 'μg/m³', type: DeviceType.PURIFIER, roomId: 'living' },
+      { id: 'humidifier_living', name: '加湿器', icon: DEVICE_ICONS.humidifier, isOn: false, targetValue: 50, currentValue: 50, unit: '%', type: DeviceType.HUMIDIFIER, roomId: 'living' },
+      { id: 'light_study', name: '书桌台灯', icon: DEVICE_ICONS.light, isOn: false, targetValue: 100, currentValue: 0, unit: '%', type: DeviceType.LIGHT, roomId: 'study' },
+      { id: 'curtain_living', name: '客厅窗帘', icon: DEVICE_ICONS.curtain, isOn: true, targetValue: 100, currentValue: 100, unit: '%', type: DeviceType.CURTAIN, roomId: 'living' },
+      { id: 'ac_bedroom', name: '卧室空调', icon: DEVICE_ICONS.ac, isOn: false, targetValue: 24, currentValue: 23, unit: '°C', type: DeviceType.AC, roomId: 'bedroom' },
+      { id: 'light_bedroom', name: '卧室台灯', icon: DEVICE_ICONS.light, isOn: false, targetValue: 80, currentValue: 0, unit: '%', type: DeviceType.LIGHT, roomId: 'bedroom' }
     ]
     this.suggestions = []
     this.trendHistory = []
@@ -145,5 +154,14 @@ export class AppState {
     this.lastOperationMessage = ''
     this.operationHistory = []
     this.manualOverrideDeviceIds = []
+    this.familyName = '我的家'
+    this.memberCount = 3
+    this.rooms = [
+      { id: 'living', name: '客厅', icon: '◎' },
+      { id: 'bedroom', name: '主卧', icon: '☾' },
+      { id: 'study', name: '书房', icon: '◈' }
+    ]
+    this.currentRoomId = 'living'
+    this.currentThemeKey = 'teal'
   }
 }

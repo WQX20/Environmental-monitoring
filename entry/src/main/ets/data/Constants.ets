@@ -39,6 +39,24 @@ export const COLORS: Record<string, string> = {
   'overlay': 'rgba(15,23,42,0.04)',
 }
 
+// ---------- 主题预设 ----------
+interface ThemePreset {
+  name: string
+  primary: string
+  primaryLight: string
+  primarySoft: string
+  bgPrimary: string
+  label: string
+}
+export const THEME_PRESETS: Record<string, ThemePreset> = {
+  'teal':    { name: '青瓷', primary: '#0D9488', primaryLight: '#5EEAD4', primarySoft: '#CCFBF1', bgPrimary: '#F0FDF4', label: '默认' },
+  'sky':     { name: '天蓝', primary: '#0284C7', primaryLight: '#7DD3FC', primarySoft: '#E0F2FE', bgPrimary: '#F0F9FF', label: '天蓝' },
+  'rose':    { name: '玫瑰', primary: '#E11D48', primaryLight: '#FDA4AF', primarySoft: '#FFE4E6', bgPrimary: '#FFF1F2', label: '玫瑰' },
+  'violet':  { name: '紫罗兰', primary: '#7C3AED', primaryLight: '#C4B5FD', primarySoft: '#EDE9FE', bgPrimary: '#F5F3FF', label: '紫罗' },
+  'amber':   { name: '琥珀', primary: '#D97706', primaryLight: '#FCD34D', primarySoft: '#FEF3C7', bgPrimary: '#FFFBEB', label: '琥珀' },
+  'slate':   { name: '岩灰', primary: '#475569', primaryLight: '#CBD5E1', primarySoft: '#F1F5F9', bgPrimary: '#F8FAFC', label: '岩灰' },
+}
+
 // ---------- 渐变色定义 ----------
 // ArkUI 的 linearGradient 使用 direction + ColorStop[] 数组
 export const GRADIENTS: Record<string, Array<[string, number]>> = {
@@ -232,7 +250,7 @@ export const SCENE_DESCRIPTIONS: Record<string, string> = {
 // ============================================================
 export const ICONS: Record<string, string> = {
   // ── 导航 ──
-  'navHome': '⌂',
+  'navHome': '◎',
   'navScene': '◉',
   'navDevice': '⚙',
   'navAi': '✦',
@@ -258,7 +276,7 @@ export const ICONS: Record<string, string> = {
   'child': '♥',
   'elderly': '☘',
   'away': '➤',
-  'normal': '⌂',
+  'normal': '◎',
 
   // ── 状态 ──
   'check': '✓',
@@ -273,7 +291,7 @@ export const ICONS: Record<string, string> = {
 
   // ── 分类标签 ──
   'catEnv': '◉',
-  'catHealth': '♥',
+  'catHealth': '大',
   'catStudy': '◈',
   'catEnergy': '⚡',
 
@@ -313,7 +331,7 @@ export const SCENE_ICONS: Record<string, string> = {
   '儿童模式': '♥',
   '老人模式': '☘',
   '离家模式': '➤',
-  '普通模式': '⌂'
+  '普通模式': '◎'
 }
 
 // ---------- 场景主题色 ----------
