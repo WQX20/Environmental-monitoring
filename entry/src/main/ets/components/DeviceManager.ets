@@ -4,6 +4,7 @@
 import { AppState, Device, DeviceType, Room } from '../model/DataModels'
 import { DEVICE_ICONS, COLORS, RADIUS, FONTS, ICONS } from '../data/Constants'
 import { sharedState } from '../data/AppStateManager'
+import { publishOperation } from '../service/DeviceController'
 
 // 可添加的设备模板
 interface DeviceTemplate {
@@ -54,11 +55,14 @@ export struct DeviceManager {
       roomId: this.roomId
     }
     this.appState.devices.push(newDevice)
+    publishOperation(this.appState, `添加设备：${newDevice.name}`)
     if (this.onDeviceChanged) this.onDeviceChanged()
   }
 
   removeDevice(deviceId: string): void {
+    let dev = this.appState.devices.find(d => d.id === deviceId)
     this.appState.devices = this.appState.devices.filter(d => d.id !== deviceId)
+    publishOperation(this.appState, `删除设备：${dev?.name || deviceId}`)
     if (this.onDeviceChanged) this.onDeviceChanged()
   }
 
