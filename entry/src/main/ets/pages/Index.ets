@@ -19,7 +19,7 @@ struct Index {
   private unsubscribeStateChange: (() => void) | undefined = undefined
 
   getThemePrimary(): string {
-    return THEME_PRESETS[sharedState.currentThemeKey]?.primary || COLORS.primary
+    return sharedState.getThemePrimary()
   }
 
   aboutToAppear(): void {
@@ -55,7 +55,7 @@ struct Index {
       .fadingEdge(false)
     }
     .width('100%').height('100%')
-    .backgroundColor(COLORS.bgPrimary)
+    .backgroundColor(sharedState.getThemeBg())
   }
 
   // ── 普通图标 Tab ──

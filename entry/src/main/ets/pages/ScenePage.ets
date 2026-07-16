@@ -5,7 +5,7 @@ import { AppState, SceneMode } from '../model/DataModels'
 import { SceneCard } from '../components/SceneCard'
 import { LinkagePanel } from '../components/LinkagePanel'
 import { getSceneRecommendations, SceneRecommendation } from '../service/SceneAdvisor'
-import { applySceneAutomation, executeAutoOptimize } from '../service/DeviceController'
+import { applySceneAutomation, executeAutoOptimize, subscribeStateChange } from '../service/DeviceController'
 import { COLORS, SCENE_DESCRIPTIONS, SCENE_ICONS, FONTS, RADIUS, DURATION, ICONS } from '../data/Constants'
 import { generateMockData } from '../data/MockData'
 import { sharedState } from '../data/AppStateManager'
@@ -17,7 +17,9 @@ export struct ScenePage {
   @State recommendations: SceneRecommendation[] = []
   @State sceneResultText: string = ''
   @State showSceneResult: boolean = false
+  @State localRev: number = 0
   private timerId: number = -1
+  private usc: (() => void) | undefined = undefined
 
   aboutToAppear(): void {
     this.updateRecommendations()
@@ -25,9 +27,11 @@ export struct ScenePage {
       this.appState.currentEnv = generateMockData()
       this.updateRecommendations()
     }, 3000)
+    this.usc = subscribeStateChange(() => { this.localRev++ })
   }
   aboutToDisappear(): void {
     if (this.timerId !== -1) clearInterval(this.timerId)
+    if (this.usc) { this.usc(); this.usc = undefined }
   }
 
   updateRecommendations(): void {
@@ -157,6 +161,6 @@ export struct ScenePage {
       .width('100%')
     }
     .width('100%').height('100%')
-    .backgroundColor(COLORS.bgPrimary)
+    .backgroundColor(sharedState.getThemeBg())
   }
 }

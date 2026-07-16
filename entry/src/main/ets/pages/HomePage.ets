@@ -6,7 +6,7 @@ import { EnvironmentCard } from '../components/EnvironmentCard'
 import { MetricRow } from '../components/MetricRow'
 import { LinkagePanel } from '../components/LinkagePanel'
 import { calculateEnvironmentScore } from '../service/EnvironmentScore'
-import { executeAutoOptimize, getLinkageSuggestions } from '../service/DeviceController'
+import { executeAutoOptimize, getLinkageSuggestions, subscribeStateChange } from '../service/DeviceController'
 import { generateMockData } from '../data/MockData'
 import { sharedState } from '../data/AppStateManager'
 import { COLORS, THRESHOLDS, FONTS, RADIUS, DURATION, ICONS } from '../data/Constants'
@@ -19,7 +19,9 @@ export struct HomePage {
   @State linkageActions: string[] = []
   @State showOptimizeResult: boolean = false
   @State optimizeResultText: string = ''
+  @State localRev: number = 0
   private timerId: number = -1
+  private unsub: (() => void) | undefined = undefined
 
   aboutToAppear(): void {
     this.refreshData()
@@ -27,10 +29,12 @@ export struct HomePage {
       this.appState.currentEnv = generateMockData()
       this.refreshData()
     }, 3000)
+    this.unsub = subscribeStateChange(() => { this.localRev++ })
   }
 
   aboutToDisappear(): void {
     if (this.timerId !== -1) clearInterval(this.timerId)
+    if (this.unsub) { this.unsub(); this.unsub = undefined }
   }
 
   refreshData(): void {
@@ -171,7 +175,7 @@ export struct HomePage {
       .width('100%')
     }
     .width('100%').height('100%')
-    .backgroundColor(COLORS.bgPrimary)
+    .backgroundColor(sharedState.getThemeBg())
   }
 
   getOutdoorBadgeColor(): string {

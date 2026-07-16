@@ -154,7 +154,7 @@ export struct DevicePage {
         .width('100%')
       }
       .width('100%').height('100%')
-      .backgroundColor(COLORS.bgPrimary)
+      .backgroundColor(sharedState.getThemeBg())
 
       // ═══ Toast ═══
       if (this.showToast) {

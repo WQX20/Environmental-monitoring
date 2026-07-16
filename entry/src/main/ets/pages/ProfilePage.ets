@@ -4,7 +4,8 @@
 import { AppState, Room } from '../model/DataModels'
 import { StatCard } from '../components/StatCard'
 import { sharedState } from '../data/AppStateManager'
-import { COLORS, FONTS, RADIUS, ICONS, THEME_PRESETS, DURATION } from '../data/Constants'
+import { COLORS, FONTS, RADIUS, ICONS, THEME_PRESETS } from '../data/Constants'
+import { publishOperation } from '../service/DeviceController'
 
 interface EnvStats { good: number; fair: number; bad: number }
 
@@ -17,11 +18,10 @@ export struct ProfilePage {
   @State toastMsg: string = ''
   @State showToast: boolean = false
 
-  // ── 主题色 ──
-  getTheme(): string { return THEME_PRESETS[this.appState.currentThemeKey]?.primary || COLORS.primary }
-  getThemeSoft(): string { return THEME_PRESETS[this.appState.currentThemeKey]?.primarySoft || COLORS.primarySoft }
-  getThemeLight(): string { return THEME_PRESETS[this.appState.currentThemeKey]?.primaryLight || COLORS.primaryLight }
-  getThemeBg(): string { return THEME_PRESETS[this.appState.currentThemeKey]?.bgPrimary || COLORS.bgPrimary }
+  // ── 主题色 (代理到 AppState) ──
+  getTheme(): string { return this.appState.getThemePrimary() }
+  getThemeSoft(): string { return this.appState.getThemeSoft() }
+  getThemeBg(): string { return this.appState.getThemeBg() }
 
   toast(msg: string): void { this.toastMsg = msg; this.showToast = true; setTimeout(() => { this.showToast = false }, 1600) }
 
@@ -253,6 +253,7 @@ export struct ProfilePage {
               .alignItems(HorizontalAlign.Center)
               .onClick(() => {
                 this.appState.currentThemeKey = key
+                publishOperation(this.appState, `切换主题：${THEME_PRESETS[key]?.name || key}`)
                 let n = THEME_PRESETS[key]?.name || ''
                 this.toast(`主题切换为「${n}」`)
               })

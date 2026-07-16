@@ -8,14 +8,16 @@ import { calculateEnvironmentScore } from '../service/EnvironmentScore'
 import { generateMockData } from '../data/MockData'
 import { sharedState } from '../data/AppStateManager'
 import { COLORS, FONTS, RADIUS, ICONS } from '../data/Constants'
-import { publishOperation } from '../service/DeviceController'
+import { publishOperation, subscribeStateChange } from '../service/DeviceController'
 
 @Component
 export struct AiAdvicePage {
   @Prop uiRevision: number = 0
   @State appState: AppState = sharedState
+  @State localRev: number = 0
   private timerId: number = -1
   private trendTimerId: number = -1
+  private usc: (() => void) | undefined = undefined
 
   aboutToAppear(): void {
     let initial = generateSuggestions(this.appState)
@@ -27,10 +29,12 @@ export struct AiAdvicePage {
       mergeSuggestions(this.appState, sugs)
     }, 10000)
     this.trendTimerId = setInterval(() => { this.recordTrend() }, 60000)
+    this.usc = subscribeStateChange(() => { this.localRev++ })
   }
   aboutToDisappear(): void {
     if (this.timerId !== -1) clearInterval(this.timerId)
     if (this.trendTimerId !== -1) clearInterval(this.trendTimerId)
+    if (this.usc) { this.usc(); this.usc = undefined }
   }
 
   recordTrend(): void {
@@ -194,7 +198,7 @@ export struct AiAdvicePage {
       .width('100%')
     }
     .width('100%').height('100%')
-    .backgroundColor(COLORS.bgPrimary)
+    .backgroundColor(sharedState.getThemeBg())
   }
 
   getReminderIcon(type: string): string {

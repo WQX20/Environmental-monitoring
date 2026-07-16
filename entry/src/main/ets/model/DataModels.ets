@@ -1,7 +1,7 @@
 // ============================================================
 // 智慧环境生活管家 — 数据模型定义
 // ============================================================
-import { DEVICE_ICONS } from '../data/Constants'
+import { DEVICE_ICONS, THEME_PRESETS } from '../data/Constants'
 
 // ---------- 环境指标 ----------
 export interface EnvironmentData {
@@ -163,5 +163,18 @@ export class AppState {
     ]
     this.currentRoomId = 'living'
     this.currentThemeKey = 'teal'
+  }
+
+  getThemePrimary(): string {
+    return THEME_PRESETS[this.currentThemeKey]?.primary || '#0D9488'
+  }
+  getThemeBg(): string {
+    return THEME_PRESETS[this.currentThemeKey]?.bgPrimary || '#F0FDF4'
+  }
+  getThemeSoft(): string {
+    return THEME_PRESETS[this.currentThemeKey]?.primarySoft || '#CCFBF1'
+  }
+  getThemeLight(): string {
+    return THEME_PRESETS[this.currentThemeKey]?.primaryLight || '#5EEAD4'
   }
 }
