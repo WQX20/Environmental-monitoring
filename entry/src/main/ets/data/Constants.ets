@@ -225,6 +225,21 @@ export const TIMERS: TimersConfig = {
   trendRecord: 60000
 }
 
+// ---------- AI 模型接入配置 ----------
+interface AiModelConfig {
+  enabled: boolean
+  endpoint: string
+  timeoutMs: number
+  maxSuggestions: number
+}
+
+export const AI_MODEL_CONFIG: AiModelConfig = {
+  enabled: true,
+  endpoint: 'http://192.168.6.51:3000/ai/advice',
+  timeoutMs: 10000,
+  maxSuggestions: 3
+}
+
 // ---------- 动画时长 ----------
 export const DURATION: Record<string, number> = {
   'fast': 150,

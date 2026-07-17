@@ -4,37 +4,92 @@
 import { AppState, Suggestion, TrendPoint, HealthReminder } from '../model/DataModels'
 import { SuggestionBubble } from '../components/SuggestionBubble'
 import { generateSuggestions, mergeSuggestions } from '../service/AiAdvisor'
+import { fetchChatAnswer, fetchModelSuggestions } from '../service/AiModelService'
 import { calculateEnvironmentScore } from '../service/EnvironmentScore'
 import { generateMockData } from '../data/MockData'
 import { sharedState } from '../data/AppStateManager'
-import { COLORS, FONTS, RADIUS, ICONS } from '../data/Constants'
+import { COLORS, FONTS, RADIUS, ICONS, TIMERS } from '../data/Constants'
 import { publishOperation, subscribeStateChange } from '../service/DeviceController'
+
+interface ChatMessage {
+  id: string
+  role: string
+  content: string
+}
 
 @Component
 export struct AiAdvicePage {
   @Prop uiRevision: number = 0
   @State appState: AppState = sharedState
   @State localRev: number = 0
+  @State chatMessages: ChatMessage[] = [
+    { id: 'chat-welcome', role: 'assistant', content: '你可以直接问我：当前环境要注意什么？我会结合本地环境、设备和场景来回答。' }
+  ]
+  @State chatInput: string = ''
+  @State chatBusy: boolean = false
   private timerId: number = -1
   private trendTimerId: number = -1
   private usc: (() => void) | undefined = undefined
 
   aboutToAppear(): void {
-    let initial = generateSuggestions(this.appState)
-    mergeSuggestions(this.appState, initial)
+    this.refreshSuggestions()
     this.recordTrend()
     this.timerId = setInterval(() => {
       this.appState.currentEnv = generateMockData()
-      let sugs = generateSuggestions(this.appState)
-      mergeSuggestions(this.appState, sugs)
-    }, 10000)
-    this.trendTimerId = setInterval(() => { this.recordTrend() }, 60000)
+      this.refreshSuggestions()
+    }, TIMERS.suggestionCheck)
+    this.trendTimerId = setInterval(() => { this.recordTrend() }, TIMERS.trendRecord)
     this.usc = subscribeStateChange(() => { this.localRev++ })
   }
   aboutToDisappear(): void {
     if (this.timerId !== -1) clearInterval(this.timerId)
     if (this.trendTimerId !== -1) clearInterval(this.trendTimerId)
     if (this.usc) { this.usc(); this.usc = undefined }
+  }
+
+  refreshSuggestions(): void {
+    let localSuggestions = generateSuggestions(this.appState)
+    mergeSuggestions(this.appState, localSuggestions)
+    void fetchModelSuggestions(this.appState).then((modelSuggestions: Suggestion[]) => {
+      mergeSuggestions(this.appState, modelSuggestions)
+    })
+  }
+
+  appendChatMessage(role: string, content: string): void {
+    this.chatMessages = [...this.chatMessages, {
+      id: `chat-${Date.now()}-${this.chatMessages.length}`,
+      role: role,
+      content: content
+    }]
+  }
+
+  sendChatQuestion(): void {
+    let question = this.chatInput.trim()
+    if (question.length === 0 || this.chatBusy) {
+      return
+    }
+
+    this.appendChatMessage('user', question)
+    this.chatInput = ''
+    this.chatBusy = true
+
+    void fetchChatAnswer(this.appState, question).then((answer: string) => {
+      this.appendChatMessage('assistant', answer.length > 0 ? answer : '我暂时没有拿到有效回复，请稍后再试。')
+    }).catch(() => {
+      this.appendChatMessage('assistant', '请求失败了，请确认 backend 已启动，并把 Constants.ets 里的 endpoint 改成电脑局域网 IP。')
+    }).finally(() => {
+      this.chatBusy = false
+    })
+  }
+
+  getChatBubbleColor(role: string): string {
+    if (role === 'user') return COLORS.primary
+    return COLORS.surface
+  }
+
+  getChatTextColor(role: string): string {
+    if (role === 'user') return COLORS.textInverse
+    return COLORS.textPrimary
   }
 
   recordTrend(): void {
@@ -74,6 +129,89 @@ export struct AiAdvicePage {
         }
         .width('100%')
         .padding({ left: 20, right: 20, top: 20, bottom: 16 })
+
+        // ═══ AI 对话 ═══
+        Column({ space: 10 }) {
+          Row({ space: 6 }) {
+            Text('✦').fontSize(18)
+            Text('AI 对话').fontSize(FONTS.titleSm).fontWeight(FontWeight.Bold).fontColor(COLORS.textPrimary)
+          }
+          .width('100%')
+
+          Text('你可以问“当前环境要注意什么”“现在适合开窗吗”“今天有什么风险”之类的问题。')
+            .fontSize(FONTS.caption)
+            .fontColor(COLORS.textTertiary)
+
+          Column({ space: 10 }) {
+            ForEach(this.chatMessages, (message: ChatMessage) => {
+              Row() {
+                if (message.role === 'user') {
+                  Blank().layoutWeight(1)
+                  Column() {
+                    Text(message.content)
+                      .fontSize(FONTS.bodySm)
+                      .fontColor(this.getChatTextColor(message.role))
+                      .textAlign(TextAlign.Start)
+                  }
+                  .width('80%')
+                  .padding({ left: 12, right: 12, top: 10, bottom: 10 })
+                  .backgroundColor(this.getChatBubbleColor(message.role))
+                  .borderRadius({ topLeft: RADIUS.lg, topRight: RADIUS.lg, bottomLeft: RADIUS.lg, bottomRight: 4 })
+                } else {
+                  Column() {
+                    Text(message.content)
+                      .fontSize(FONTS.bodySm)
+                      .fontColor(this.getChatTextColor(message.role))
+                      .textAlign(TextAlign.Start)
+                  }
+                  .width('80%')
+                  .padding({ left: 12, right: 12, top: 10, bottom: 10 })
+                  .backgroundColor(this.getChatBubbleColor(message.role))
+                  .borderRadius({ topLeft: RADIUS.lg, topRight: RADIUS.lg, bottomRight: RADIUS.lg, bottomLeft: 4 })
+                  Blank().layoutWeight(1)
+                }
+              }
+              .width('100%')
+            })
+          }
+          .width('100%')
+
+          Row({ space: 8 }) {
+            TextInput({ placeholder: this.chatBusy ? 'AI 正在思考...' : '请输入你的问题', text: this.chatInput })
+              .fontSize(FONTS.bodySm)
+              .height(44)
+              .layoutWeight(1)
+              .backgroundColor('transparent')
+              .onChange((v: string) => { this.chatInput = v })
+            Button(this.chatBusy ? '发送中' : '发送')
+              .fontSize(FONTS.bodySm)
+              .fontColor(COLORS.textInverse)
+              .height(44)
+              .padding({ left: 16, right: 16 })
+              .backgroundColor(COLORS.primary)
+              .borderRadius(RADIUS.lg)
+              .onClick(() => { this.sendChatQuestion() })
+          }
+          .width('100%')
+
+          Row({ space: 8 }) {
+            Text('示例：当前环境要注意什么？')
+              .fontSize(FONTS.caption)
+              .fontColor(COLORS.textTertiary)
+              .onClick(() => { this.chatInput = '当前环境要注意什么？' })
+            Text('现在适合开窗吗？')
+              .fontSize(FONTS.caption)
+              .fontColor(COLORS.textTertiary)
+              .onClick(() => { this.chatInput = '现在适合开窗吗？' })
+          }
+          .width('100%')
+        }
+        .width('90%')
+        .padding(14)
+        .backgroundColor(COLORS.surface)
+        .borderRadius(RADIUS.lg)
+        .shadow({ radius: 4, color: 'rgba(15,23,42,0.06)', offsetY: 1 })
+        .margin({ bottom: 18 })
 
         // ═══ 建议列表 ═══
         Row({ space: 6 }) {
